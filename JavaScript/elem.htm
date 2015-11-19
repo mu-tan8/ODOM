@@ -1,0 +1,33 @@
+<script src="ODOM.js"></script>
+<script>//<!--
+
+var object = {
+	'elements':[{
+		'tagName':'html',
+		'attributes':{
+			'lang':'ja'
+		},
+		'elements':[
+		{
+			'tagName':'head',
+			'elements':[{
+				'tagName':'title',
+				'text':'sample'
+			}]
+		},
+		{
+			'tagName':'body',
+			'elements':[{
+				'tagName':'p',
+				'text':'test'
+			}]
+		}
+		]
+	}]
+};
+
+	document.open();
+	document.writeln(new ODOM(object).toDOMString());
+	document.close();
+
+//--></script>
