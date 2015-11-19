@@ -40,20 +40,22 @@ var object = {
 
 object to DOM exsample.
 
-	ODOMObject = new ODOM(object);
-	DOMNodes = object.toDOM() || object.toDOM(document);
-	DOMStrings = object.toDOMString() || object.toDOMString(document);
+	ODOMObject = new ODOM(object) || ODOM(object);
+	DOMNodes = ODOMObject.toDOM() || ODOMObject.toDOM(document);
+	DOMStrings = ODOMObject.toDOMString() || ODOMObject.toDOMString(document);
 
 ___output___
 <html lang="ja"><head><title>sample</title></head><body><p>test</p></body></html>
 
 */
 
-
 var ODOM = function (myObject){
 
+//	new ODOM() || ODOM()
 /*	(ODOMObject) = new ODOM(object);	*/
  
+	myObject = myObject || {} ;	//	new ODOM Objects.
+
 	var flag = (function(obj){	//	ODOM Object construct validater
 
 		for (var p in obj){
@@ -103,83 +105,86 @@ var ODOM = function (myObject){
 		throw e;
 	}
 
-	this.elements = myObject.elements;
-
-}
-
 //	ODOM.toDOM() Method
 /*	(DOMObject) = ODOM.toDOM(documentObject);	*/
 
-Object.prototype.toDOM = function (oDocument){
+	var toDOM = function (oDocument){
 
-	oDocument = oDocument || document;
+		oDocument = oDocument || document;
 
-	if (!oDocument['createElement']){
-		return false;
-	}
-	var oRoot = oDocument.createElement('div');
-	var test = ['appendChild','setAttribute','childNodes'];
-	for (var i = 0;i < test.length;i++){
-		if (!oRoot[test[i]]){
+		if (!oDocument['createElement']){
 			return false;
 		}
-	}
-	test = null;
-
-	(function (obj , oParentNode){
-		for (var p in obj){
-			var prop = obj[p];
-			switch (p){
-				case 'elements' :
-					for (var i = 0;i < prop.length;i++){
-						if (isNaN(prop[i].tagName)){
-							var oChildNode = oParentNode.appendChild(oDocument.createElement(prop[i].tagName));
-							arguments.callee(prop[i] , oChildNode);
-							oChildNode = null;
-						}
-					}
-					break;
-				case 'attributes' :
-					for (var a in prop){
-						if (isNaN(a) && prop[a]){
-							oParentNode.setAttribute(a , prop[a]);
-							a = null;
-						}
-					}
-					break;
-				case 'text' :
-					oParentNode.appendChild(oDocument.createTextNode(prop));
-					break;
-				default :
-					break;
+		var oRoot = oDocument.createElement('div');
+		var test = ['appendChild','setAttribute','childNodes'];
+		for (var i = 0;i < test.length;i++){
+			if (!oRoot[test[i]]){
+				return false;
 			}
-			prop = p = null;
 		}
-	})(this , oRoot);
+		test = null;
 
-	return oRoot.childNodes;
-};
+		(function (obj , oParentNode){
+			for (var p in obj){
+				var prop = obj[p];
+				switch (p){
+					case 'elements' :
+						for (var i = 0;i < prop.length;i++){
+							if (isNaN(prop[i].tagName)){
+								var oChildNode = oParentNode.appendChild(oDocument.createElement(prop[i].tagName));
+								arguments.callee(prop[i] , oChildNode);
+								oChildNode = null;
+							}
+						}
+						break;
+					case 'attributes' :
+						for (var a in prop){
+							if (isNaN(a) && prop[a]){
+								oParentNode.setAttribute(a , prop[a]);
+								a = null;
+							}
+						}
+						break;
+					case 'text' :
+						oParentNode.appendChild(oDocument.createTextNode(prop));
+						break;
+					default :
+						break;
+				}
+				prop = p = null;
+			}
+		})(this , oRoot);
+
+		return oRoot.childNodes;
+	};
 
 //	ODOM.toDOMString() Method
 /*	(DOMString) = ODOM.toDOMString(documentObject);	*/
 
-Object.prototype.toDOMString = function (oDocument){
+	var toDOMString = function (oDocument){
 
-	oDocument = oDocument || document;
+		oDocument = oDocument || document;
 
-	var oRoot = document.createElement('div');
+		var oRoot = document.createElement('div');
 
-	var fragment = this.toDOM(oDocument);
-	if (!fragment.length){
-		return false;
+		var fragment = this.toDOM(oDocument);
+		if (!fragment.length){
+			return false;
+		}
+
+		for (var i = 0;i < fragment.length;i++){
+			oRoot.appendChild(fragment[i]);
+		}
+
+		fragment = null;
+
+		return oRoot.innerHTML;
 	}
 
-	for (var i = 0;i < fragment.length;i++){
-		oRoot.appendChild(fragment[i]);
+	return {
+		elements: myObject.elements ,
+		toDOM: toDOM ,
+		toDOMString: toDOMString
 	}
 
-	fragment = null;
-
-	return oRoot.innerHTML;
 }
-
